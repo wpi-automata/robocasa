@@ -3,7 +3,18 @@ import xml
 
 from robosuite.utils.mjcf_utils import array_to_string as a2s
 from robosuite.utils.mjcf_utils import string_to_array as s2a
-from robosuite.utils.mjcf_utils import find_elements, xml_path_completion, get_elements
+from robosuite.utils.mjcf_utils import find_elements, xml_path_completion
+try:
+    from robosuite.utils.mjcf_utils import get_elements
+except ImportError:
+    def get_elements(root, tag):
+        """Return list of (parent, element) for all descendants matching tag."""
+        results = []
+        for parent in root.iter():
+            for child in list(parent):
+                if child.tag == tag:
+                    results.append((parent, child))
+        return results
 
 import robocasa
 from robocasa.models.objects import MujocoXMLObject

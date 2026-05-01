@@ -929,6 +929,10 @@ from robocasa.environments.kitchen.atomic.kitchen_microwave import (
     TurnOffMicrowave,
 )
 from robocasa.environments.kitchen.atomic.kitchen_navigate import NavigateKitchen
+from robocasa.environments.kitchen.atomic.kitchen_find_and_open_drawer import (
+    FindAndOpenDrawer,
+    run_scripted_policy,
+)
 
 from robocasa.environments.kitchen.atomic.kitchen_oven import (
     PreheatOven,
@@ -1002,15 +1006,15 @@ from robosuite.robots import ALL_ROBOTS
 
 import mujoco
 
-assert (
-    mujoco.__version__ == "3.3.1"
-), "MuJoCo version must be 3.3.1. Please run pip install mujoco==3.3.1"
+if mujoco.__version__ != "3.3.1":
+    import warnings
+    warnings.warn(f"robocasa expects MuJoCo 3.3.1 but {mujoco.__version__} is installed. Some features may not work correctly.")
 
 import numpy
 
-assert numpy.__version__ in [
-    "2.2.5",
-], "numpy version must be 2.2.5. Please install this version."
+if numpy.__version__ not in ["2.2.5"]:
+    import warnings
+    warnings.warn(f"robocasa expects numpy 2.2.5 but {numpy.__version__} is installed. Some features may not work correctly.")
 
 import robosuite
 
@@ -1022,9 +1026,9 @@ if robosuite_version[0] == 1 and robosuite_version[1] < 5:
     robosuite_check = False
 if robosuite_version[0] == 1 and robosuite_version[1] == 5 and robosuite_version[2] < 2:
     robosuite_check = False
-assert (
-    robosuite_check
-), "robosuite version must be >=1.5.2 Please install the correct version"
+if not robosuite_check:
+    import warnings
+    warnings.warn(f"robocasa expects robosuite >=1.5.2 but {robosuite.__version__} is installed. Some features may not work correctly.")
 
 __version__ = "1.0.0"
 __logo__ = """

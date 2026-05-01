@@ -16,6 +16,10 @@ from robosuite.environments.base import EnvMeta
 from collections import defaultdict
 
 from robosuite.models.robots import PandaOmron
+try:
+    from robosuite.models.robots import Stretch3
+except ImportError:
+    Stretch3 = None
 
 import robocasa
 import robocasa.macros as macros
@@ -519,7 +523,6 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
             horizon=horizon,
             ignore_done=ignore_done,
             hard_reset=True,
-            load_model_on_init=False,
             camera_names=camera_names,
             camera_heights=camera_heights,
             camera_widths=camera_widths,
@@ -573,6 +576,12 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                     0.69615947,
                 )
                 robot.init_torso_qpos = np.array([0.0])
+            elif Stretch3 is not None and isinstance(robot.robot_model, Stretch3):
+                # lift=0.5m, arm segments ~0.025m each (joints 0-4), wrist/gripper/head=0
+                q = np.zeros(18)
+                q[0] = 0.5
+                q[1] = q[2] = q[3] = q[4] = 0.025
+                robot.init_qpos = q
 
         for robot in self.robots:
             if isinstance(robot.robot_model, PandaOmron):
@@ -636,8 +645,6 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
             mujoco_arena=self.mujoco_arena,
             mujoco_robots=[robot.robot_model for robot in self.robots],
             mujoco_objects=list(self.fixtures.values()),
-            enable_multiccd=True,
-            enable_sleeping_islands=False,
         )
 
     def _load_model(self, attempt_num=1):
